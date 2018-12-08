@@ -1,26 +1,40 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const database = require("../controller/database");
+const dataCtrl = require("../utils/dataCtrl");
 
-/* GET users listing. */
-router.post("/register", function(req, res, next) {
-  const data = req.body;
-  database.create(User, data, res);
+const LOGIN_STATUS = new Map([
+  [0, "查询失败"],
+  [1, "登录成功"],
+  [2, "密码错误"],
+  [3, "用户不存在"]
+]);
+
+const getLoginStatu = code => ({
+  code: code,
+  desc: LOGIN_STATUS.get(code)
 });
 
-router.post("/login", function(req, res, next) {
+/* GET users listing. */
+router.post("/createUser", function(req, res, next) {
+  const data = req.body;
+  dataCtrl.create(User, data, res);
+});
+
+router.post("/checkUserLogin", function(req, res, next) {
   const data = req.body;
   User.findOne({ email: data.email })
     .select("password")
-    .exec(function(err, docs){
-      if (err || !docs) {
-        res.send({ code: 0 });
+    .exec(function(err, docs) {
+      if (err) {
+        res.send(getLoginStatu(0));
         console.error(err);
-        return;
       } else if (docs) {
-        if (data.password === docs.password) res.send({ code: 2 });
-        else res.send({ code: 1 });
+        if (docs.password) {
+          res.send(getLoginStatu(data.password === docs.password ? 1 : 2));
+        } else {
+          res.send(getLoginStatu(3));
+        }
       }
     });
 });

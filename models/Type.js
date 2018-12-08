@@ -1,9 +1,9 @@
 var mongoose = require("mongoose");
-var mongodb = require("./mongodb");
+var mongodb = require("../utils/mongodb");
 var Schema = mongodb.mongoose.Schema;
 
 // 声明一个数据集 对象
-var TypeSchema = new Schema({
+var typeSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -19,4 +19,4 @@ var TypeSchema = new Schema({
 });
 
 // 将数据模型暴露出去
-module.exports = mongoose.model("students", studentSchema);
+module.exports = mongoose.model("types", typeSchema);

@@ -1,4 +1,4 @@
-let database = {
+let dataCtrl = {
 	
   create: (model, data, res) => {
     model.create(data, function(err, docs) {
@@ -13,4 +13,4 @@ let database = {
 	}
 };
 
-module.exports = database;
+module.exports = dataCtrl;

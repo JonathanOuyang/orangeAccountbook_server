@@ -1,8 +1,8 @@
-var mongoose = require("mongoose");
-var mongodb = require("./mongodb");
-var Schema = mongodb.mongoose.Schema;
+const mongoose = require("mongoose");
+const mongodb = require("../utils/mongodb");
+const Schema = mongodb.mongoose.Schema;
 
-var UserSchema = new Schema({
+const moneySchema = new Schema({
   //金额
   value: {
     type: String,
@@ -40,4 +40,4 @@ var UserSchema = new Schema({
 });
 
 // 将数据模型暴露出去
-module.exports = mongoose.model("students", studentSchema);
+module.exports = moneySchema;
