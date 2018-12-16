@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const mongodb = require("../utils/mongodb");
 const Schema = mongodb.mongoose.Schema;
-const moneySchema = require("../models/Money");
 const Type = require("../models/Type");
 
 // 声明一个数据集 对象
@@ -18,11 +17,11 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
-  moneys: [moneySchema],
+  moneys: [{ type: Schema.Types.ObjectId, ref: "Money" }],
   types: {
-      type: String
+    type: String
   }
 });
 
 // 将数据模型暴露出去
-module.exports = mongoose.model('user', userSchema);
+module.exports = mongoose.model("user", userSchema);

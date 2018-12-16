@@ -3,6 +3,10 @@ const mongodb = require("../utils/mongodb");
 const Schema = mongodb.mongoose.Schema;
 
 const moneySchema = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: "User"
+  },
   //金额
   value: {
     type: String,
@@ -31,7 +35,7 @@ const moneySchema = new Schema({
   // 产生时间
   time: {
     type: Date,
-    require: true
+    default: Date.now
   },
   // 备注
   note: {
@@ -39,5 +43,7 @@ const moneySchema = new Schema({
   }
 });
 
+moneySchema.index({ userId: 1 });
+
 // 将数据模型暴露出去
-module.exports = moneySchema;
+module.exports = mongoose.model("money", moneySchema);

@@ -1,5 +1,4 @@
 let dataCtrl = {
-	
   create: (model, data, res) => {
     model.create(data, function(err, docs) {
       if (err) {
@@ -9,8 +8,8 @@ let dataCtrl = {
       }
       // saved!
       res.send({ code: 1 });
-		});
-	}
+    });
+  }
 };
 
 module.exports = dataCtrl;
