@@ -1,24 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const dataCtrl = require("../utils/dataCtrl");
-
-const LOGIN_STATUS = new Map([
-  [0, "查询失败"],
-  [1, "登录成功"],
-  [2, "密码错误"],
-  [3, "用户不存在"]
-]);
-
-const getLoginStatu = code => ({
-  code: code,
-  desc: LOGIN_STATUS.get(code)
-});
+const response = require("../utils/response");
 
 /* GET users listing. */
 router.post("/createUser", function(req, res, next) {
   const data = req.body;
-  dataCtrl.create(User, data, res);
+  User.create(data, function(err, docs) {
+    if (err) {
+      res.send(response("注册账号失败", {}, "register_error"));
+      console.error(err);
+      return;
+    }
+    res.send(response("注册账号成功"));
+  });
 });
 
 router.post("/checkUserLogin", function(req, res, next) {
@@ -27,14 +22,18 @@ router.post("/checkUserLogin", function(req, res, next) {
     .select("password")
     .exec(function(err, docs) {
       if (err) {
-        res.send(getLoginStatu(0));
+        res.send(response("账号查询失败", {}, "query_user_error"));
         console.error(err);
       } else if (docs) {
         if (docs.password) {
-          res.send(getLoginStatu(data.password === docs.password ? 1 : 2));
-        } else {
-          res.send(getLoginStatu(3));
+          res.send(
+            data.password === docs.password
+              ? response("登录成功")
+              : response("密码错误", {}, "password_wrong")
+          );
         }
+      } else {
+        res.send(response("账号不存在", {}, "account_dont_exist"));
       }
     });
 });

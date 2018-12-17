@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Money = require("../models/Money");
 const User = require("../models/User");
-const dataCtrl = require("../utils/dataCtrl");
+const response = require("../utils/response");
 
 /* GET users listing. */
 router.post("/createMoney", function(req, res, next) {
@@ -11,22 +11,13 @@ router.post("/createMoney", function(req, res, next) {
   // saved!
   money.save(function(err, docs) {
     console.log(docs);
-
-    // User.findByIdAndUpdate(data._user, {
-    //   function(userErr, userDocs) {
-    //     if (userErr) {
-    //       console.error(userErr);
-    //     }
-    //     return;
-    //   }
-    // });
     if (err) {
-      res.send({ code: 0 });
+      res.send(response("添加账单失败", "create_money_error"));
       console.error(err);
       return;
     }
     // saved!
-    res.send({ code: 1 });
+    res.send(response("添加账单成功"));
   });
 });
 
@@ -39,8 +30,8 @@ router.post("/getDayMoneys", function(req, res, next) {
     userId: userId
   };
   Money.find(query).exec(function(err, docs) {
-    if (err) res.send({ code: 0, desc: err });
-    res.send(docs);
+    if (err) res.send(response("查询账单失败", "query_money_error"));
+    res.send(response("查询账单成功", docs));
   });
 });
 
