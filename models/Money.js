@@ -30,7 +30,7 @@ const moneySchema = new Schema({
   // 账户
   account: {
     type: Number,
-    required: true
+    // required: true
   },
   // 产生时间
   time: {

@@ -30,7 +30,7 @@ router.post("/getDayMoneys", function(req, res, next) {
     userId: userId
   };
   Money.find(query).exec(function(err, docs) {
-    if (err) res.send(response("查询账单失败", "query_money_error"));
+    if (err) return res.send(response("查询账单失败", "query_money_error"));
     res.send(response("查询账单成功", docs));
   });
 });
