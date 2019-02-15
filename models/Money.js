@@ -4,8 +4,7 @@ const Schema = mongodb.mongoose.Schema;
 
 const moneySchema = new Schema({
   userId: {
-    type: Schema.Types.ObjectId,
-    ref: "User"
+    type: Schema.Types.ObjectId
   },
   //金额
   value: {
@@ -18,24 +17,27 @@ const moneySchema = new Schema({
     1: 收入
     2: 转账 
   */
-  whereabouts: {
-    type: Number,
-    required: true
-  },
-  // 分类
   type: {
     type: Number,
     required: true
   },
+  // 分类
+  categoryId: {
+    type: Number,
+    required: true
+  },
   // 账户
-  account: {
+  accountId: {
     type: Number,
     // required: true
   },
-  // 产生时间
-  time: {
+  // 更新时间
+  updateTime: {
     type: Date,
     default: Date.now
+  },
+  moneyTime: {
+    type: Date
   },
   // 备注
   note: {

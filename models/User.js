@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const mongodb = require("../utils/mongodb");
 const Schema = mongodb.mongoose.Schema;
-const Type = require("../models/Type");
 
 // 声明一个数据集 对象
 const userSchema = new Schema({
@@ -17,9 +16,31 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
-  moneys: [{ type: Schema.Types.ObjectId, ref: "Money" }],
-  types: {
-    type: String
+  
+  categorys: {
+    name: {
+      type: String,
+      required: true
+    },
+    icon: {
+      type: String,
+      required: true
+    },
+    type: {
+      type: String,
+      required: true
+    }
+  },
+
+  accounts: {
+    name: {
+      type: String,
+      required: true
+    },
+    color: {
+      type: String,
+      required: true
+    }
   }
 });
 
