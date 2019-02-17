@@ -4,7 +4,8 @@ const Schema = mongodb.mongoose.Schema;
 
 const moneySchema = new Schema({
   userId: {
-    type: Schema.Types.ObjectId
+    type: Schema.Types.ObjectId,
+    required: true
   },
   //金额
   value: {

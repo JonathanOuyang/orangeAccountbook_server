@@ -51,8 +51,7 @@ router.post("/login",async (req, res) => {
     if (isMatch) {
       const token = jwt.sign(
         {
-          email: user.email,
-          password: user.password
+          id: user._id
         },
         "orange",
         { expiresIn: "2d" }
