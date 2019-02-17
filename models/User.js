@@ -19,27 +19,22 @@ const userSchema = new Schema({
   
   categorys: {
     name: {
-      type: String,
-      required: true
+      type: String
     },
     icon: {
-      type: String,
-      required: true
+      type: String
     },
     type: {
-      type: String,
-      required: true
+      type: String
     }
   },
 
   accounts: {
     name: {
-      type: String,
-      required: true
+      type: String
     },
     color: {
-      type: String,
-      required: true
+      type: String
     }
   }
 });
