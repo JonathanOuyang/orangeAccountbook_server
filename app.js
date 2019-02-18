@@ -33,7 +33,10 @@ app.use(cors());
 
 app.use(
   decodeToken().unless({
-    path: [{ url: "/users/login", methods: ["POST"] }]
+    path: [
+      { url: "/users/login", methods: ["POST"] },
+      { url: "/users/register", methods: ["POST"] }
+    ]
   })
 );
 

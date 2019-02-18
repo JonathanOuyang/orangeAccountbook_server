@@ -5,8 +5,84 @@ const response = require("../utils/response");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+function getDefaultData() {
+  const outcomeCategory = [
+    { name: "餐饮", icon: "canyin" },
+    { name: "购物", icon: "gouwu" },
+    { name: "服饰", icon: "fushi" },
+    { name: "交通", icon: "jiaotong" },
+    { name: "娱乐", icon: "yule" },
+    { name: "社交", icon: "shejiao" },
+    { name: "居家", icon: "jujia" },
+    { name: "通讯", icon: "tongxun" },
+    { name: "零食", icon: "lingshi" },
+    { name: "美容", icon: "meirong" },
+    { name: "运动", icon: "yundong" },
+    { name: "旅行", icon: "lvxing" },
+    { name: "数码", icon: "shuma" },
+    { name: "学习", icon: "xuexi" },
+    { name: "医疗", icon: "yiliao" },
+    { name: "书籍", icon: "shuji" },
+    { name: "宠物", icon: "chongwu" },
+    { name: "彩票", icon: "caipiao1" },
+    { name: "汽车", icon: "qiche" },
+    { name: "办公", icon: "bangong" },
+    { name: "住房", icon: "zhufang" },
+    { name: "维修", icon: "weixiu" },
+    { name: "孩子", icon: "haizi" },
+    { name: "长辈", icon: "changbei" },
+    { name: "礼物", icon: "liwu" },
+    { name: "礼金", icon: "lijin" },
+    { name: "还款", icon: "huankuan" },
+    { name: "捐赠", icon: "juanzeng" }
+  ];
+
+  const incomeCategory = [
+    { name: "理财收益", icon: "licaishouyi" },
+    { name: "兼职", icon: "jianzhi" },
+    { name: "工资", icon: "gongzi" },
+    { name: "理财", icon: "licai" }
+  ]
+
+  const outcomes = outcomeCategory.map((item, index) => ({
+    ...item,
+    type: 0,
+    sort: index,
+    status: 0
+  }))
+
+  const incomes = incomeCategory.map((item, index) => ({
+    ...item,
+    type: 1,
+    sort: index
+  }))
+
+  const accounts = [
+    {
+      name: '支付宝',
+      color: '#43a1ee',
+      value: 0
+    },
+    {
+      name: '微信钱包',
+      color: '#45bc00',
+      value: 0
+    },
+    {
+      name: '现金',
+      color: '#b90014',
+      value: 0
+    }
+  ]
+
+  return {
+    categorys: [...incomes, ...outcomes],
+    accounts
+  }
+}
+
 router.post("/register", (req, res) => {
-  // console.log(req.body);
+  
   //查询数据库中是否拥有邮箱
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
@@ -15,7 +91,8 @@ router.post("/register", (req, res) => {
       const newUser = new User({
         name: req.body.name,
         email: req.body.email,
-        password: req.body.password
+        password: req.body.password,
+        ...getDefaultData()
       });
       //密码加密  需npm install bcrypt
       bcrypt.genSalt(10, function(err, salt) {
@@ -35,6 +112,8 @@ router.post("/register", (req, res) => {
         });
       });
     }
+
+
   });
 });
 

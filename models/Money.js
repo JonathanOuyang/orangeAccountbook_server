@@ -24,13 +24,13 @@ const moneySchema = new Schema({
   },
   // 分类
   categoryId: {
-    type: Number,
+    type: Schema.Types.ObjectId,
     required: true
   },
   // 账户
   accountId: {
-    type: Number,
-    // required: true
+    type: Schema.Types.ObjectId,
+    required: true
   },
   // 更新时间
   updateTime: {
