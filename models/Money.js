@@ -5,6 +5,7 @@ const Schema = mongodb.mongoose.Schema;
 const moneySchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
+    ref: "user",
     required: true
   },
   //金额
@@ -25,6 +26,7 @@ const moneySchema = new Schema({
   // 分类
   categoryId: {
     type: Schema.Types.ObjectId,
+    ref: "categorys",
     required: true
   },
   // 账户
