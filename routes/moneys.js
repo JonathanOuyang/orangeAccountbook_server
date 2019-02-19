@@ -5,7 +5,7 @@ const User = require("../models/User");
 const {response, docsToObject} = require("../utils/utils");
 const Mock = require("mockjs");
 
-/* GET users listing. */
+// 添加账单
 router.post("/addMoney", function(req, res, next) {
   const data = req.body;
   data.userId = req.userInfo.id;
@@ -60,6 +60,7 @@ router.post("/addMoney", function(req, res, next) {
   });
 });
 
+// 更新账单
 router.post("/updateMoney", function(req, res, next) {
   const data = req.body;
   // saved!
@@ -81,6 +82,7 @@ router.post("/updateMoney", function(req, res, next) {
   );
 });
 
+// 删除账单
 router.post("/deleteMoney", function(req, res, next) {
   const moneyId = req.body.moneyId;
   // saved!
@@ -99,6 +101,7 @@ router.post("/deleteMoney", function(req, res, next) {
   );
 });
 
+// 查询账单列表
 router.post("/searchMoneyList", async function(req, res, next) {
   const searchValue = req.body.searchValue || {};
   const sortOption = req.body.sortOption || {};

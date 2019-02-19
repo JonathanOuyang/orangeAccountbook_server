@@ -5,6 +5,7 @@ const { response } = require('../utils/utils')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
+// 获取用户默认数据
 function getDefaultData() {
   const outcomeCategory = [
     { name: '餐饮', icon: 'canyin' },
@@ -81,6 +82,7 @@ function getDefaultData() {
   }
 }
 
+// 注册用户
 router.post('/register', (req, res) => {
   //查询数据库中是否拥有邮箱
   User.findOne({ email: req.body.email }).then(user => {
@@ -114,6 +116,7 @@ router.post('/register', (req, res) => {
   })
 })
 
+// 用户登录
 router.post('/login', async (req, res) => {
   const email = req.body.email
   const password = req.body.password
@@ -139,7 +142,8 @@ router.post('/login', async (req, res) => {
   })
 })
 
-router.post('/searchCategoryMap', async (req, res) => {
+// 查询分类
+router.post('/getCategoryMap', async (req, res) => {
   const query = {
     userId: req.userInfo.id,
   }
@@ -150,7 +154,8 @@ router.post('/searchCategoryMap', async (req, res) => {
   return res.send(response('查询账单成功', null, { map: moneyInfo.categorys }))
 })
 
-router.post('/searchAccountMap', async (req, res) => {
+// 查询账户
+router.post('/getAccountMap', async (req, res) => {
   const query = {
     userId: req.userInfo.id,
   }

@@ -4,6 +4,7 @@
  * @param {String} [summary] 响应说明
  * @param {String} [code] 响应码, 默认值: "success"
  * @param {String} [data] 响应的真正数据
+ * @param {String} [others] 其他数据
  * @return {Object} 响应内容
  */
 const response = (summary, code, data = {}, others={}) => ({
@@ -13,6 +14,13 @@ const response = (summary, code, data = {}, others={}) => ({
   ...others
 });
 
+
+/**
+ * 返回接口响应数据
+ * @method docsToObject
+ * @param {Array} [docs] 查询回调的文档
+ * @return {Object} 以document的_id作为key值的Object
+ */
 const docsToObject = (docs) => {
   const obj = {};
   docs.map(item => {
