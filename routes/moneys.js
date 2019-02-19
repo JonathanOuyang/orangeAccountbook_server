@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Money = require("../models/Money");
 const User = require("../models/User");
-const response = require("../utils/response");
+const {response, docsToObject} = require("../utils/utils");
 const Mock = require("mockjs");
 
 /* GET users listing. */
@@ -99,7 +99,7 @@ router.post("/deleteMoney", function(req, res, next) {
   );
 });
 
-router.post("/searchMoneyList", function(req, res, next) {
+router.post("/searchMoneyList", async function(req, res, next) {
   const searchValue = req.body.searchValue || {};
   const sortOption = req.body.sortOption || {};
   const pageSize = Number(req.body.pageSize);
@@ -152,7 +152,8 @@ router.post("/searchMoneyList", function(req, res, next) {
   searchValue.accountId !== undefined &&
     (query.accountId = searchValue.accountId);
 
-  const money = Money.find(query)
+  const moneyInfo = await User.getMoneyInfoByUser(query.userId)
+  Money.find(query)
     .skip((page - 1) * pageSize)
     .limit(pageSize)
     .sort(sortOption)
@@ -163,7 +164,9 @@ router.post("/searchMoneyList", function(req, res, next) {
       }
       return res.send(
         response("查询账单成功", null, {
-          list: docs
+          list: docs,
+          categoryMap: docsToObject(moneyInfo.categorys),
+          accountMap: docsToObject(moneyInfo.accounts)
         })
       );
     });

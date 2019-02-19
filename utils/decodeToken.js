@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const response = require("../utils/response");
+const {response} = require("./utils");
 const unless = require("express-unless");
 
 module.exports = function(options) {

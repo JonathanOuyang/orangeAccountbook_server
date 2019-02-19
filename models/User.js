@@ -68,5 +68,13 @@ const userSchema = new Schema({
   // },
 })
 
+userSchema.statics = {
+  async getMoneyInfoByUser(userId) {
+    console.log(await this.findById(userId).select('categorys accounts'));
+    
+    return await this.findById(userId).select('categorys accounts')
+  }
+}
+
 // 将数据模型暴露出去
 module.exports = mongoose.model('user', userSchema)
