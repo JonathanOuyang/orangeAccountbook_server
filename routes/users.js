@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const User = require('../models/User')
+const Account = require('../models/Account')
 const { response } = require('../utils/utils')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -85,27 +86,40 @@ function getDefaultData() {
 // 注册用户
 router.post('/register', (req, res) => {
   //查询数据库中是否拥有邮箱
+  const defaultData = getDefaultData()
   User.findOne({ email: req.body.email }).then(user => {
     if (user) {
-      return res.status(400).json({ email: '邮箱已被占用' })
+      return res.send(response('邮箱已被占用', 'register_email_exist'))
     } else {
       const newUser = new User({
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-        ...getDefaultData(),
+        categorys: defaultData.categorys
       })
-      //密码加密  需npm install bcrypt
       bcrypt.genSalt(10, function(err, salt) {
         bcrypt.hash(newUser.password, salt, function(err, hash) {
-          //store hash in your password DB.
           if (err) {
             throw err
           }
           newUser.password = hash
           newUser
             .save()
-            .then(user => res.send(response('注册账号成功')))
+            .then(user => {
+              Account.create(
+                defaultData.accounts.map(item => ({
+                  ...item,
+                  userId: user._id,
+                })),
+                function(err, docs) {
+                  if (err) {
+                    console.log(err)
+                    return res.send(response('注册账号失败', 'register_error'))
+                  }
+                }
+              )
+              res.send(response('注册账号成功'))
+            })
             .catch(err => {
               res.send(response('注册账号失败', 'register_error'))
               console.log(err)

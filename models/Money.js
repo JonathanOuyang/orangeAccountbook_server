@@ -26,12 +26,12 @@ const moneySchema = new Schema({
   // 分类
   categoryId: {
     type: Schema.Types.ObjectId,
-    ref: "categorys",
     required: true
   },
   // 账户
   accountId: {
     type: Schema.Types.ObjectId,
+    ref: "account",
     required: true
   },
   // 更新时间

@@ -1,115 +1,115 @@
-const express = require("express");
-const router = express.Router();
-const Money = require("../models/Money");
-const User = require("../models/User");
-const {response, docsToObject} = require("../utils/utils");
-const Mock = require("mockjs");
+const express = require('express')
+const router = express.Router()
+const Money = require('../models/Money')
+const User = require('../models/User')
+const { response, docsToObject } = require('../utils/utils')
+const Mock = require('mockjs')
 
 // 添加账单
-router.post("/addMoney", function(req, res, next) {
-  const data = req.body;
-  data.userId = req.userInfo.id;
+router.post('/addMoney', function(req, res, next) {
+  const data = req.body
+  data.userId = req.userInfo.id
 
-  const money = new Money(data);
+  const money = new Money(data)
 
   const mockData = Mock.mock({
-    "array|100": [
+    'array|100': [
       {
-        "value|1-100": 100,
+        'value|1-100': 100,
         userId: data.userId,
-        "type|0-1": 1,
-        "categoryId|1": [
-          "5c6a453ed7bd5147f833fc22",
-          "5c6a453ed7bd5147f833fc21",
-          "5c6a453ed7bd5147f833fc20",
-          "5c6a453ed7bd5147f833fc1f",
-          "5c6a453ed7bd5147f833fc1e"
+        'type|0-1': 1,
+        'categoryId|1': [
+          '5c6a453ed7bd5147f833fc22',
+          '5c6a453ed7bd5147f833fc21',
+          '5c6a453ed7bd5147f833fc20',
+          '5c6a453ed7bd5147f833fc1f',
+          '5c6a453ed7bd5147f833fc1e',
         ],
-        "accountId|1": [
-          "5c6a453ed7bd5147f833fc29",
-          "5c6a453ed7bd5147f833fc28",
-          "5c6a453ed7bd5147f833fc27"
+        'accountId|1': [
+          '5c6a453ed7bd5147f833fc29',
+          '5c6a453ed7bd5147f833fc28',
+          '5c6a453ed7bd5147f833fc27',
         ],
-        "moneyTime|1543622400000-1553990400000": 1553990400000
-      }
-    ]
-  });
+        'moneyTime|1543622400000-1553990400000': 1553990400000,
+      },
+    ],
+  })
   // saved!
   if (data.test) {
     mockData.array.forEach(item => {
-      let mockMoney = new Money(item);
+      let mockMoney = new Money(item)
       mockMoney.save(function(err, docs) {
         if (err) {
-          console.error(err);
-          return res.send(response("添加账单失败", "add_money_error"));
+          console.error(err)
+          return res.send(response('添加账单失败', 'add_money_error'))
         }
         // saved!
-      });
-    });
-    return res.send(response("已生成mock数据"));
+      })
+    })
+    return res.send(response('已生成mock数据'))
   }
 
   money.save(function(err, docs) {
     if (err) {
-      res.send(response("添加账单失败", "add_money_error"));
-      console.error(err);
-      return;
+      res.send(response('添加账单失败', 'add_money_error'))
+      console.error(err)
+      return
     }
     // saved!
-    res.send(response("添加账单成功"));
-  });
-});
+    res.send(response('添加账单成功'))
+  })
+})
 
 // 更新账单
-router.post("/updateMoney", function(req, res, next) {
-  const data = req.body;
+router.post('/updateMoney', function(req, res, next) {
+  const data = req.body
   // saved!
   Money.findOneAndUpdate(
     { _id: data.moneyId, userId: req.userInfo.id },
     { ...data, updateTime: new Date() },
     function(err, docs) {
-      console.log(docs);
+      console.log(docs)
       if (err) {
-        res.send(response("编辑账单失败", "update_money_error"));
-        console.error(err);
-        return;
+        res.send(response('编辑账单失败', 'update_money_error'))
+        console.error(err)
+        return
       } else if (docs) {
-        return res.send(response("找不到账单", "money_not_found"));
+        return res.send(response('找不到账单', 'money_not_found'))
       }
       // saved!
-      return res.send(response("编辑账单成功"));
+      return res.send(response('编辑账单成功'))
     }
-  );
-});
+  )
+})
 
 // 删除账单
-router.post("/deleteMoney", function(req, res, next) {
-  const moneyId = req.body.moneyId;
+router.post('/deleteMoney', function(req, res, next) {
+  const moneyId = req.body.moneyId
   // saved!
   Money.deleteMany(
-    { _id: { $in: moneyId.split(",") }, userId: req.userInfo.id },
+    { _id: { $in: moneyId.split(',') }, userId: req.userInfo.id },
     function(err, docs) {
-      console.log(docs);
+      console.log(docs)
       if (err) {
-        res.send(response("删除账单失败", "delete_money_error"));
-        console.error(err);
-        return;
+        res.send(response('删除账单失败', 'delete_money_error'))
+        console.error(err)
+        return
       }
       // saved!
-      res.send(response("删除账单成功"));
+      res.send(response('删除账单成功'))
     }
-  );
-});
+  )
+})
 
 // 查询账单列表
-router.post("/searchMoneyList", async function(req, res, next) {
-  const searchValue = req.body.searchValue || {};
-  const sortOption = req.body.sortOption || {};
-  const pageSize = Number(req.body.pageSize);
-  const page = Number(req.body.page);
+router.post('/searchMoneyList', async function(req, res, next) {
+  const searchValue = req.body.searchValue || {}
+  const sortOption = req.body.sortOption || {}
+  const pageSize = Number(req.body.pageSize)
+  const page = Number(req.body.page)
   const query = {
-    userId: req.userInfo.id
-  };
+    userId: req.userInfo.id,
+  }
 
   if (
     searchValue.moneyTimeStart !== undefined &&
@@ -117,16 +117,16 @@ router.post("/searchMoneyList", async function(req, res, next) {
   ) {
     query.moneyTime = {
       $gte: new Date(searchValue.moneyTimeStart).getTime(),
-      $lt: new Date(searchValue.moneyTimeEnd).getTime()
-    };
+      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
+    }
   } else if (searchValue.moneyTimeStart !== undefined) {
     query.moneyTime = {
-      $gte: new Date(searchValue.moneyTimeStart).getTime()
-    };
+      $gte: new Date(searchValue.moneyTimeStart).getTime(),
+    }
   } else if (searchValue.moneyTimeEnd !== undefined) {
     query.moneyTime = {
-      $lt: new Date(searchValue.moneyTimeEnd).getTime()
-    };
+      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
+    }
   }
 
   if (
@@ -135,25 +135,25 @@ router.post("/searchMoneyList", async function(req, res, next) {
   ) {
     query.value = {
       $gte: searchValue.minValue,
-      $lte: searchValue.maxValue
-    };
+      $lte: searchValue.maxValue,
+    }
   } else if (searchValue.minValue !== undefined) {
     query.value = {
-      $gte: searchValue.minValue
-    };
+      $gte: searchValue.minValue,
+    }
   } else if (searchValue.maxValue !== undefined) {
     query.value = {
-      $lte: searchValue.maxValue
-    };
+      $lte: searchValue.maxValue,
+    }
   }
 
-  searchValue.type !== undefined && (query.type = searchValue.type);
+  searchValue.type !== undefined && (query.type = searchValue.type)
 
   searchValue.categoryId !== undefined &&
-    (query.categoryId = searchValue.categoryId);
+    (query.categoryId = searchValue.categoryId)
 
   searchValue.accountId !== undefined &&
-    (query.accountId = searchValue.accountId);
+    (query.accountId = searchValue.accountId)
 
   const moneyInfo = await User.getMoneyInfoByUser(query.userId)
   Money.find(query)
@@ -162,17 +162,70 @@ router.post("/searchMoneyList", async function(req, res, next) {
     .sort(sortOption)
     .exec((err, docs) => {
       if (err) {
-        console.error(err);
-        return res.send(response("查询账单失败", "query_money_error"));
+        console.error(err)
+        return res.send(response('查询账单失败', 'query_money_error'))
       }
       return res.send(
-        response("查询账单成功", null, {
+        response('查询账单成功', null, {
           list: docs,
           categoryMap: docsToObject(moneyInfo.categorys),
-          accountMap: docsToObject(moneyInfo.accounts)
+          accountMap: docsToObject(moneyInfo.accounts),
         })
-      );
-    });
-});
+      )
+    })
+})
 
-module.exports = router;
+router.post('/getMoneySum', function(req, res, next) {
+  const searchValue = req.body.searchValue || {}
+  const query = {
+    userId: req.userInfo.id,
+  }
+
+  if (
+    searchValue.moneyTimeStart !== undefined &&
+    searchValue.moneyTimeStart !== undefined
+  ) {
+    query.moneyTime = {
+      $gte: new Date(searchValue.moneyTimeStart).getTime(),
+      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
+    }
+  } else if (searchValue.moneyTimeStart !== undefined) {
+    query.moneyTime = {
+      $gte: new Date(searchValue.moneyTimeStart).getTime(),
+    }
+  } else if (searchValue.moneyTimeEnd !== undefined) {
+    query.moneyTime = {
+      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
+    }
+  }
+
+  searchValue.categoryId !== undefined &&
+    (query.categoryId = searchValue.categoryId)
+
+  searchValue.accountId !== undefined &&
+    (query.accountId = searchValue.accountId)
+
+  Money.find(query).exec((err, docs) => {
+    let income = 0,
+      outcome = 0
+    if (err) {
+      console.error(err)
+      return res.send(response('查询账单失败', 'query_money_error'))
+    }
+    docs.forEach(item => {
+      if (item.type == 0) {
+        outcome += Number(item.value)
+      } else if (item.type == 1) {
+        income += Number(item.value)
+      }
+    })
+    return res.send(
+      response('查询账单成功', null, {
+        outcomeSum: outcome,
+        incomeSum: income,
+      })
+    )
+  })
+})
+
+module.exports = router

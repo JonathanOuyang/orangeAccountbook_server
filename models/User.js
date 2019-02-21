@@ -21,18 +21,6 @@ const categoryScheme = new Schema({
   }
 })
 
-const accountScheme = new Schema({
-  name: {
-    type: String,
-  },
-  color: {
-    type: String,
-  },
-  value: {
-    type: Number
-  }
-})
-
 const userSchema = new Schema({
   name: {
     type: String,
@@ -48,8 +36,6 @@ const userSchema = new Schema({
   },
 
   categorys: [categoryScheme],
-
-  accounts: [accountScheme],
 
   // 预算
   budgetValue: {
