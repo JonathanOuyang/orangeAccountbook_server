@@ -16,6 +16,9 @@ const accountScheme = new Schema({
   },
   value: {
     type: Number
+  },
+  summary: {
+    type: String
   }
 })
 

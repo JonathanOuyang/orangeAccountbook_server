@@ -56,9 +56,7 @@ const userSchema = new Schema({
 
 userSchema.statics = {
   async getMoneyInfoByUser(userId) {
-    console.log(await this.findById(userId).select('categorys accounts'));
-    
-    return await this.findById(userId).select('categorys accounts')
+    return await this.findById(userId).select('categorys')
   }
 }
 

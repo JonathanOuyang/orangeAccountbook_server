@@ -95,7 +95,7 @@ router.post('/register', (req, res) => {
         name: req.body.name,
         email: req.body.email,
         password: req.body.password,
-        categorys: defaultData.categorys
+        categorys: defaultData.categorys,
       })
       bcrypt.genSalt(10, function(err, salt) {
         bcrypt.hash(newUser.password, salt, function(err, hash) {
@@ -157,27 +157,35 @@ router.post('/login', async (req, res) => {
 })
 
 // 查询分类
-router.post('/getCategoryMap', async (req, res) => {
+router.post('/getCategoryList', (req, res) => {
   const query = {
     userId: req.userInfo.id,
   }
-  const moneyInfo = await User.getMoneyInfoByUser(query.userId).catch(err => {
-    console.log(err)
-    return res.send(response('查询账单失败', 'query_money_error'))
-  })
-  return res.send(response('查询账单成功', null, { map: moneyInfo.categorys }))
+  User.findById(query.userId, function(err, doc) {
+    if (err) {
+      console.log(err)
+      return res.send(response('查询分类失败', 'query_money_error'))
+    }
+    return res.send(
+      response('查询分类成功', null, { list: doc.categorys })
+    )
+  }).select('categorys')
 })
 
 // 查询账户
-router.post('/getAccountMap', async (req, res) => {
+router.post('/getAccountList', async (req, res) => {
   const query = {
     userId: req.userInfo.id,
   }
-  const moneyInfo = await User.getMoneyInfoByUser(query.userId).catch(err => {
-    console.log(err)
-    return res.send(response('查询账单失败', 'query_money_error'))
+  Account.find(query,function(err, docs){
+    if (err) {
+      console.log(err)
+      return res.send(response('查询账户失败', 'query_money_error'))
+    }
+    return res.send(
+      response('查询账户成功', null, { list: docs })
+    )
   })
-  return res.send(response('查询账单成功', null, { map: moneyInfo.accounts }))
 })
 
 router.post('/searchMoneyInfo', async (req, res) => {

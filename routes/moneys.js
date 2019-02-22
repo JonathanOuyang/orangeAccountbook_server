@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Money = require('../models/Money')
 const User = require('../models/User')
+const Account = require('../models/Account')
 const { response, docsToObject } = require('../utils/utils')
 const Mock = require('mockjs')
 
@@ -11,28 +12,27 @@ router.post('/addMoney', function(req, res, next) {
   data.userId = req.userInfo.id
 
   const money = new Money(data)
-
-  const mockData = Mock.mock({
-    'array|100': [
-      {
-        'value|1-100': 100,
-        userId: data.userId,
-        'type|0-1': 1,
-        'categoryId|1': [
-          '5c6a453ed7bd5147f833fc22',
-          '5c6a453ed7bd5147f833fc21',
-          '5c6a453ed7bd5147f833fc20',
-          '5c6a453ed7bd5147f833fc1f',
-          '5c6a453ed7bd5147f833fc1e',
-        ],
-        'accountId|1': [
-          '5c6a453ed7bd5147f833fc29',
-          '5c6a453ed7bd5147f833fc28',
-          '5c6a453ed7bd5147f833fc27',
-        ],
-        'moneyTime|1543622400000-1553990400000': 1553990400000,
-      },
+  const mockOption = {
+    'value|1-100': 100,
+    userId: data.userId,
+    'type|0-1': 1,
+    'categoryId|1': [
+      '5c6e1bf41548d4240cf32723',
+      '5c6e1bf41548d4240cf32722',
+      '5c6e1bf41548d4240cf32721',
+      '5c6e1bf41548d4240cf32720',
+      '5c6e1bf41548d4240cf3271f',
     ],
+    'accountId|1': [
+      '5c6e1bf51548d4240cf32728',
+      '5c6e1bf51548d4240cf32729',
+      '5c6e1bf51548d4240cf3272a',
+    ],
+    'moneyTime|1543622400000-1550750164088': 1550750164088,
+  }
+  mockOption['moneyTime|1543622400000-' + new Date().getTime()] = 1
+  const mockData = Mock.mock({
+    'array|100': [mockOption],
   })
   // saved!
   if (data.test) {
@@ -41,7 +41,7 @@ router.post('/addMoney', function(req, res, next) {
       mockMoney.save(function(err, docs) {
         if (err) {
           console.error(err)
-          return res.send(response('添加账单失败', 'add_money_error'))
+          return res.send(response('生成mock数据失败', 'add_money_error'))
         }
         // saved!
       })
@@ -155,11 +155,12 @@ router.post('/searchMoneyList', async function(req, res, next) {
   searchValue.accountId !== undefined &&
     (query.accountId = searchValue.accountId)
 
-  const moneyInfo = await User.getMoneyInfoByUser(query.userId)
+  const categorys = await User.getMoneyInfoByUser(query.userId)
+  const accounts = await Account.find({ userId: query.userId })
   Money.find(query)
+    .sort(sortOption)
     .skip((page - 1) * pageSize)
     .limit(pageSize)
-    .sort(sortOption)
     .exec((err, docs) => {
       if (err) {
         console.error(err)
@@ -168,11 +169,35 @@ router.post('/searchMoneyList', async function(req, res, next) {
       return res.send(
         response('查询账单成功', null, {
           list: docs,
-          categoryMap: docsToObject(moneyInfo.categorys),
-          accountMap: docsToObject(moneyInfo.accounts),
+          categoryMap: docsToObject(categorys.categorys),
+          accountMap: docsToObject(accounts),
         })
       )
     })
+})
+
+router.post('/getMoneyDetail', function(req, res, next) {
+  const query = {
+    userId: req.userInfo.id,
+    _id: req.body.moneyId,
+  }
+
+  Money.findOne(query, async function(err, doc) {
+    if (err) {
+      console.error(err)
+      return res.send(response('查询账单失败', 'query_money_error'))
+    } else {
+      const user = await User.findById(query.userId)
+      const category = await user.categorys.id(doc.categoryId)
+      const account = await Account.findOne({
+        userId: query.userId,
+        _id: doc.accountId,
+      })
+      return res.send(
+        response('查询账单成功', null, { detail: doc, category, account })
+      )
+    }
+  })
 })
 
 router.post('/getMoneySum', function(req, res, next) {

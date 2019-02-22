@@ -10,7 +10,7 @@ const moneySchema = new Schema({
   },
   //金额
   value: {
-    type: String,
+    type: Number,
     required: true
   },
   // 去向
