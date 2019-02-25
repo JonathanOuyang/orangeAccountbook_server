@@ -103,101 +103,107 @@ router.post('/deleteMoney', function(req, res, next) {
 
 // 查询账单列表
 router.post('/searchMoneyList', async function(req, res, next) {
-  const searchValue = req.body.searchValue || {}
-  const sortOption = req.body.sortOption || {}
-  const pageSize = Number(req.body.pageSize)
-  const page = Number(req.body.page)
-  const query = {
-    userId: req.userInfo.id,
-  }
-
-  if (
-    searchValue.moneyTimeStart !== undefined &&
-    searchValue.moneyTimeStart !== undefined
-  ) {
-    query.moneyTime = {
-      $gte: new Date(searchValue.moneyTimeStart).getTime(),
-      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
+  try {
+    const searchValue = req.body.searchValue || {}
+    const sortOption = req.body.sortOption || {}
+    const pageSize = Number(req.body.pageSize)
+    const page = Number(req.body.page)
+    const query = {
+      userId: req.userInfo.id,
     }
-  } else if (searchValue.moneyTimeStart !== undefined) {
-    query.moneyTime = {
-      $gte: new Date(searchValue.moneyTimeStart).getTime(),
-    }
-  } else if (searchValue.moneyTimeEnd !== undefined) {
-    query.moneyTime = {
-      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
-    }
-  }
 
-  if (
-    searchValue.minValue !== undefined &&
-    searchValue.maxValue !== undefined
-  ) {
-    query.value = {
-      $gte: searchValue.minValue,
-      $lte: searchValue.maxValue,
-    }
-  } else if (searchValue.minValue !== undefined) {
-    query.value = {
-      $gte: searchValue.minValue,
-    }
-  } else if (searchValue.maxValue !== undefined) {
-    query.value = {
-      $lte: searchValue.maxValue,
-    }
-  }
-
-  searchValue.type !== undefined && (query.type = searchValue.type)
-
-  searchValue.categoryId !== undefined &&
-    (query.categoryId = searchValue.categoryId)
-
-  searchValue.accountId !== undefined &&
-    (query.accountId = searchValue.accountId)
-
-  const categorys = await User.getMoneyInfoByUser(query.userId)
-  const accounts = await Account.find({ userId: query.userId })
-  Money.find(query)
-    .sort(sortOption)
-    .skip((page - 1) * pageSize)
-    .limit(pageSize)
-    .exec((err, docs) => {
-      if (err) {
-        console.error(err)
-        return res.send(response('查询账单失败', 'query_money_error'))
+    if (
+      searchValue.moneyTimeStart !== undefined &&
+      searchValue.moneyTimeStart !== undefined
+    ) {
+      query.moneyTime = {
+        $gte: new Date(searchValue.moneyTimeStart).getTime(),
+        $lt: new Date(searchValue.moneyTimeEnd).getTime(),
       }
+    } else if (searchValue.moneyTimeStart !== undefined) {
+      query.moneyTime = {
+        $gte: new Date(searchValue.moneyTimeStart).getTime(),
+      }
+    } else if (searchValue.moneyTimeEnd !== undefined) {
+      query.moneyTime = {
+        $lt: new Date(searchValue.moneyTimeEnd).getTime(),
+      }
+    }
+
+    if (
+      searchValue.minValue !== undefined &&
+      searchValue.maxValue !== undefined
+    ) {
+      query.value = {
+        $gte: searchValue.minValue,
+        $lte: searchValue.maxValue,
+      }
+    } else if (searchValue.minValue !== undefined) {
+      query.value = {
+        $gte: searchValue.minValue,
+      }
+    } else if (searchValue.maxValue !== undefined) {
+      query.value = {
+        $lte: searchValue.maxValue,
+      }
+    }
+
+    searchValue.type !== undefined && (query.type = searchValue.type)
+
+    searchValue.categoryId !== undefined &&
+      (query.categoryId = searchValue.categoryId)
+
+    searchValue.accountId !== undefined &&
+      (query.accountId = searchValue.accountId)
+
+    const categorys = await User.getMoneyInfoByUser(query.userId)
+    const accounts = await Account.find({ userId: query.userId })
+    const count = await Money.where(query).count()
+    const maxPage = Math.floor(count / pageSize)
+    const currPage = maxPage < page ? maxPage : page
+
+    const moneys = await Money.find(query)
+      .sort(sortOption)
+      .skip((currPage - 1) * pageSize)
+      .limit(pageSize)
+    if (moneys.length) {
       return res.send(
         response('查询账单成功', null, {
-          list: docs,
+          list: moneys,
           categoryMap: docsToObject(categorys.categorys),
           accountMap: docsToObject(accounts),
+          currPage,
+          maxPage,
+          pageSize,
         })
       )
-    })
+    }
+  } catch (err) {
+    console.error(err)
+    return res.send(response('查询账单失败', 'query_money_error'))
+  }
 })
 
-router.post('/getMoneyDetail', function(req, res, next) {
-  const query = {
-    userId: req.userInfo.id,
-    _id: req.body.moneyId,
-  }
-
-  Money.findOne(query, async function(err, doc) {
-    if (err) {
-      console.error(err)
-      return res.send(response('查询账单失败', 'query_money_error'))
-    } else {
-      const user = await User.findById(query.userId)
-      const category = await user.categorys.id(doc.categoryId)
-      const account = await Account.findOne({
-        userId: query.userId,
-        _id: doc.accountId,
-      })
-      return res.send(
-        response('查询账单成功', null, { detail: doc, category, account })
-      )
+router.post('/getMoneyDetail', async function(req, res, next) {
+  try {
+    const query = {
+      userId: req.userInfo.id,
+      _id: req.body.moneyId,
     }
-  })
+    const doc = await Money.findOne(query)
+    const user = await User.findById(query.userId)
+    const category = await user.categorys.id(doc.categoryId)
+    const account = await Account.findOne({
+      userId: query.userId,
+      _id: doc.accountId,
+    })
+    return res.send(
+      response('查询账单成功', null, { detail: doc, category, account })
+    )
+  } catch (err) {
+    console.error(err)
+    return res.send(response('查询账单失败', 'query_money_error'))
+  }
 })
 
 router.post('/getMoneySum', function(req, res, next) {
