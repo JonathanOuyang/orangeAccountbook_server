@@ -1,105 +1,113 @@
-const express = require('express')
-const router = express.Router()
-const Money = require('../models/Money')
-const User = require('../models/User')
-const Account = require('../models/Account')
-const { response, docsToObject } = require('../utils/utils')
-const Mock = require('mockjs')
+const express = require("express");
+const router = express.Router();
+const Money = require("../models/Money");
+const User = require("../models/User");
+const Account = require("../models/Account");
+const { response, docsToObject } = require("../utils/utils");
+const Mock = require("mockjs");
+const Moment = require("moment");
 
-// 添加账单
-router.post('/addMoney', function(req, res, next) {
-  const data = req.body
-  data.userId = req.userInfo.id
+/* GET users listing. */
+router.post("/addMoney", function(req, res, next) {
+  const data = req.body;
+  data.userId = req.userInfo.id;
 
-  const money = new Money(data)
-  const mockOption = {
-    'value|1-100': 100,
-    userId: data.userId,
-    'type|0-1': 1,
-    'categoryId|1': [
-      '5c6e1bf41548d4240cf32723',
-      '5c6e1bf41548d4240cf32722',
-      '5c6e1bf41548d4240cf32721',
-      '5c6e1bf41548d4240cf32720',
-      '5c6e1bf41548d4240cf3271f',
-    ],
-    'accountId|1': [
-      '5c6e1bf51548d4240cf32728',
-      '5c6e1bf51548d4240cf32729',
-      '5c6e1bf51548d4240cf3272a',
-    ],
-    'moneyTime|1543622400000-1550750164088': 1550750164088,
-  }
-  mockOption['moneyTime|1543622400000-' + new Date().getTime()] = 1
+  const money = new Money(data);
+  let mockDataTime = {};
+  mockDataTime[
+    "moneyTime|" +
+      (new Date().getTime() - 2592000000) +
+      "-" +
+      new Date().getTime()
+  ] = new Date().getTime();
   const mockData = Mock.mock({
-    'array|100': [mockOption],
-  })
+    "array|100": [
+      {
+        "value|1-100": 240,
+        userId: data.userId,
+        "type|0-1": 1,
+        "categoryId|1": [
+          "5c7028d51298202b1c4a3712",
+          "5c7028d51298202b1c4a3711",
+          "5c7028d51298202b1c4a370f",
+          "5c7028d51298202b1c4a370e",
+          "5c7028d51298202b1c4a370c"
+        ],
+        "accountId|1": [
+          "5c7028d61298202b1c4a3717",
+          "5c7028d61298202b1c4a3718",
+          "5c7028d61298202b1c4a3719"
+        ],
+        ...mockDataTime
+      }
+    ]
+  });
   // saved!
   if (data.test) {
     mockData.array.forEach(item => {
-      let mockMoney = new Money(item)
+      let mockMoney = new Money(item);
       mockMoney.save(function(err, docs) {
         if (err) {
-          console.error(err)
-          return res.send(response('生成mock数据失败', 'add_money_error'))
+          console.error(err);
+          return res.send(response("生成mock数据失败", "add_money_error"));
         }
         // saved!
-      })
-    })
-    return res.send(response('已生成mock数据'))
+      });
+    });
+    return res.send(response("已生成mock数据"));
   }
 
   money.save(function(err, docs) {
     if (err) {
-      res.send(response('添加账单失败', 'add_money_error'))
-      console.error(err)
-      return
+      res.send(response("添加账单失败", "add_money_error"));
+      console.error(err);
+      return;
     }
     // saved!
-    res.send(response('添加账单成功'))
-  })
-})
+    res.send(response("添加账单成功"));
+  });
+});
 
 // 更新账单
-router.post('/updateMoney', function(req, res, next) {
-  const data = req.body
+router.post("/updateMoney", function(req, res, next) {
+  const data = req.body;
   // saved!
   Money.findOneAndUpdate(
     { _id: data.moneyId, userId: req.userInfo.id },
     { ...data, updateTime: new Date() },
     function(err, docs) {
-      console.log(docs)
+      console.log(docs);
       if (err) {
-        res.send(response('编辑账单失败', 'update_money_error'))
-        console.error(err)
-        return
-      } else if (docs) {
-        return res.send(response('找不到账单', 'money_not_found'))
+        res.send(response("编辑账单失败", "update_money_error"));
+        console.error(err);
+        return;
+      } else if (!docs) {
+        return res.send(response("找不到账单", "money_not_found"));
       }
       // saved!
-      return res.send(response('编辑账单成功'))
+      return res.send(response("编辑账单成功"));
     }
-  )
-})
+  );
+});
 
 // 删除账单
-router.post('/deleteMoney', function(req, res, next) {
-  const moneyId = req.body.moneyId
+router.post("/deleteMoney", function(req, res, next) {
+  const moneyId = req.body.moneyId;
   // saved!
   Money.deleteMany(
-    { _id: { $in: moneyId.split(',') }, userId: req.userInfo.id },
+    { _id: { $in: moneyId.split(",") }, userId: req.userInfo.id },
     function(err, docs) {
-      console.log(docs)
+      console.log(docs);
       if (err) {
-        res.send(response('删除账单失败', 'delete_money_error'))
-        console.error(err)
-        return
+        res.send(response("删除账单失败", "delete_money_error"));
+        console.error(err);
+        return;
       }
       // saved!
-      res.send(response('删除账单成功'))
+      res.send(response("删除账单成功"));
     }
-  )
-})
+  );
+});
 
 // 查询账单列表
 router.post('/searchMoneyList', async function(req, res, next) {
@@ -206,11 +214,11 @@ router.post('/getMoneyDetail', async function(req, res, next) {
   }
 })
 
-router.post('/getMoneySum', function(req, res, next) {
-  const searchValue = req.body.searchValue || {}
+router.post("/getMoneySum", function(req, res, next) {
+  const searchValue = req.body.searchValue || {};
   const query = {
-    userId: req.userInfo.id,
-  }
+    userId: req.userInfo.id
+  };
 
   if (
     searchValue.moneyTimeStart !== undefined &&
@@ -218,45 +226,82 @@ router.post('/getMoneySum', function(req, res, next) {
   ) {
     query.moneyTime = {
       $gte: new Date(searchValue.moneyTimeStart).getTime(),
-      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
-    }
+      $lt: new Date(searchValue.moneyTimeEnd).getTime()
+    };
   } else if (searchValue.moneyTimeStart !== undefined) {
     query.moneyTime = {
-      $gte: new Date(searchValue.moneyTimeStart).getTime(),
-    }
+      $gte: new Date(searchValue.moneyTimeStart).getTime()
+    };
   } else if (searchValue.moneyTimeEnd !== undefined) {
     query.moneyTime = {
-      $lt: new Date(searchValue.moneyTimeEnd).getTime(),
-    }
+      $lt: new Date(searchValue.moneyTimeEnd).getTime()
+    };
   }
 
   searchValue.categoryId !== undefined &&
-    (query.categoryId = searchValue.categoryId)
+    (query.categoryId = searchValue.categoryId);
 
   searchValue.accountId !== undefined &&
-    (query.accountId = searchValue.accountId)
+    (query.accountId = searchValue.accountId);
 
   Money.find(query).exec((err, docs) => {
     let income = 0,
-      outcome = 0
+      outcome = 0;
     if (err) {
-      console.error(err)
-      return res.send(response('查询账单失败', 'query_money_error'))
+      console.error(err);
+      return res.send(response("查询账单失败", "query_money_error"));
     }
     docs.forEach(item => {
       if (item.type == 0) {
-        outcome += Number(item.value)
+        outcome += Number(item.value);
       } else if (item.type == 1) {
-        income += Number(item.value)
+        income += Number(item.value);
       }
-    })
+    });
     return res.send(
-      response('查询账单成功', null, {
+      response("查询账单成功", null, {
         outcomeSum: outcome,
-        incomeSum: income,
+        incomeSum: income
       })
-    )
-  })
-})
+    );
+  });
+});
 
-module.exports = router
+router.post("/getCalendarInfo", function(req, res, next) {
+  const daysHasMoney = [];
+  const { year, month } = req.body;
+  const date = Moment(new Date(`${year}-${month}-1`));
+  const query = {
+    userId: req.userInfo.id
+  };
+  Money.find({
+    ...query,
+    moneyTime: {
+      $gte: date.valueOf(),
+      $lt: date.endOf("month").valueOf()
+    }
+  })
+    .sort({ moneyTime: 1 })
+    .exec(function(err, docs) {
+      if (err) {
+        console.error(err);
+        return res.send(response("查询账单失败", "query_money_error"));
+      }
+      docs.forEach(item => {
+        const dateStr = Moment(item.moneyTime).format("YYYY-MM-DD");
+        if (
+          daysHasMoney[daysHasMoney.length - 1] != dateStr ||
+          daysHasMoney.length == 0
+        ) {
+          daysHasMoney.push(dateStr);
+        }
+      });
+      return res.send(
+        response("查询账单成功", null, {
+          calendarInfo: daysHasMoney
+        })
+      );
+    });
+});
+
+module.exports = router;
