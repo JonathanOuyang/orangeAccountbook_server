@@ -166,8 +166,8 @@ router.post('/searchMoneyList', async function(req, res, next) {
 
     const categorys = await User.getMoneyInfoByUser(query.userId)
     const accounts = await Account.find({ userId: query.userId })
-    const count = await Money.where(query).count()
-    const maxPage = Math.floor(count / pageSize)
+    const count = await Money.countDocuments(query)
+    const maxPage = Math.floor(count / pageSize) + 1
     const currPage = maxPage < page ? maxPage : page
 
     const moneys = await Money.find(query)
