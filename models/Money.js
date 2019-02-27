@@ -31,8 +31,7 @@ const moneySchema = new Schema({
   // 账户
   accountId: {
     type: Schema.Types.ObjectId,
-    ref: "account",
-    required: true
+    ref: "account"
   },
   // 更新时间
   updateTime: {

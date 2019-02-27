@@ -156,52 +156,19 @@ router.post('/login', async (req, res) => {
   })
 })
 
-// 查询分类
-router.post('/getCategoryList', (req, res) => {
-  const query = {
-    userId: req.userInfo.id,
-  }
-  User.findById(query.userId, function(err, doc) {
-    if (err) {
-      console.log(err)
-      return res.send(response('查询分类失败', 'query_money_error'))
+router.post('/getCategorysAndAccounts', async (req, res) => {
+  try {
+    const query = {
+      userId: req.userInfo.id,
     }
-    return res.send(
-      response('查询分类成功', null, { list: doc.categorys })
-    )
-  }).select('categorys')
-})
+    const categoryList = await User.getCategoryList(query.userId)
+    const accountList = await Account.find(query)
 
-// 查询账户
-router.post('/getAccountList', async (req, res) => {
-  const query = {
-    userId: req.userInfo.id,
-  }
-  Account.find(query,function(err, docs){
-    if (err) {
-      console.log(err)
-      return res.send(response('查询账户失败', 'query_money_error'))
-    }
-    return res.send(
-      response('查询账户成功', null, { list: docs })
-    )
-  })
-})
-
-router.post('/searchMoneyInfo', async (req, res) => {
-  const query = {
-    userId: req.userInfo.id,
-  }
-  const moneyInfo = await User.getMoneyInfoByUser(query.userId).catch(err => {
+    res.send(response('查询账户成功', null, { categoryList, accountList }))
+  } catch (error) {
     console.log(err)
-    return res.send(response('查询账单失败', 'query_money_error'))
-  })
-  return res.send(
-    response('查询账单成功', null, {
-      categoryMap: moneyInfo.categorys,
-      accountMap: moneyInfo.accounts,
-    })
-  )
+    return res.send(response('查询账户失败', 'query_error'))
+  }
 })
 
 module.exports = router

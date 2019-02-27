@@ -55,8 +55,12 @@ const userSchema = new Schema({
 })
 
 userSchema.statics = {
-  async getMoneyInfoByUser(userId) {
+  async getCategoryList(userId) {
     return await this.findById(userId).select('categorys')
+  },
+  async getCategoryById(userId, id) {
+    const user = await this.findById(userId);
+    return user.categorys.id(id);
   }
 }
 
