@@ -10,15 +10,22 @@ const accountScheme = new Schema({
   },
   name: {
     type: String,
+    required: true
   },
   color: {
     type: String,
   },
   value: {
     type: Number,
+    required: true
   },
   summary: {
-    type: String,
+    type: String
+  },
+  // 更新时间
+  updateTime: {
+    type: Date,
+    default: Date.now
   },
 })
 

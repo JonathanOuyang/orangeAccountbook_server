@@ -9,6 +9,7 @@ router.post('/addAccount', (req, res) => {
   const data = {
     userId: req.userInfo.id,
     ...req.body,
+    updateTime: new Date()
   }
   const newAccount = new Account(data)
 
@@ -48,12 +49,13 @@ router.post('/deleteAccount', (req, res) => {
   Account.findOneAndDelete({
     userId: req.userInfo.id,
     _id: req.body.accountId,
-  }).exex(function(err, docs) {
+  }).exec(function(err, docs) {
     if (err) {
       res.send(response('删除账户失败', 'delete_account_error'))
       console.error(err)
       return
     }
+    return res.send(response('删除账户成功'))
   })
 })
 
