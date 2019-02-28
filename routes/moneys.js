@@ -7,102 +7,117 @@ const { response, docsToObject } = require('../utils/utils')
 const Mock = require('mockjs')
 const Moment = require('moment')
 
-router.post('/addMoney', function(req, res, next) {
-  const data = req.body
-  data.userId = req.userInfo.id
+router.post('/addMoney', async function(req, res, next) {
+  try {
+    const data = req.body
+    data.userId = req.userInfo.id
 
-  const money = new Money(data)
-  let mockDataTime = {}
-  mockDataTime[
-    'moneyTime|' +
-      (new Date().getTime() - 2592000000) +
-      '-' +
-      new Date().getTime()
-  ] = new Date().getTime()
-  const mockData = Mock.mock({
-    'array|100': [
-      {
-        'value|1-100': 240,
-        userId: data.userId,
-        'type|0-1': 1,
-        'categoryId|1': [
-          '5c7028d51298202b1c4a3712',
-          '5c7028d51298202b1c4a3711',
-          '5c7028d51298202b1c4a370f',
-          '5c7028d51298202b1c4a370e',
-          '5c7028d51298202b1c4a370c',
-        ],
-        'accountId|1': [
-          '5c7028d61298202b1c4a3717',
-          '5c7028d61298202b1c4a3718',
-          '5c7028d61298202b1c4a3719',
-        ],
-        ...mockDataTime,
-      },
-    ],
-  })
-  if (data.test) {
-    mockData.array.forEach(item => {
-      let mockMoney = new Money(item)
-      mockMoney.save(function(err, docs) {
-        if (err) {
-          console.error(err)
-          return res.send(response('mock账单数据失败', 'add_money_error'))
-        }
-      })
+    const money = new Money(data)
+    let mockDataTime = {}
+    mockDataTime[
+      'moneyTime|' +
+        (new Date().getTime() - 2592000000) +
+        '-' +
+        new Date().getTime()
+    ] = new Date().getTime()
+    const mockData = Mock.mock({
+      'array|100': [
+        {
+          'value|1-100': 240,
+          userId: data.userId,
+          'type|0-1': 1,
+          'categoryId|1': [
+            '5c7028d51298202b1c4a3712',
+            '5c7028d51298202b1c4a3711',
+            '5c7028d51298202b1c4a370f',
+            '5c7028d51298202b1c4a370e',
+            '5c7028d51298202b1c4a370c',
+          ],
+          'accountId|1': [
+            '5c7028d61298202b1c4a3717',
+            '5c7028d61298202b1c4a3718',
+            '5c7028d61298202b1c4a3719',
+          ],
+          ...mockDataTime,
+        },
+      ],
     })
-    return res.send(response('mock账单数据成功'))
-  }
-
-  money.save(function(err, docs) {
-    if (err) {
-      res.send(response('添加账单失败', 'add_money_error'))
-      console.error(err)
-      return
+    if (data.test) {
+      mockData.array.forEach(item => {
+        let mockMoney = new Money(item)
+        mockMoney.save(function(err, docs) {
+          if (err) {
+            console.error(err)
+            return res.send(response('mock账单数据失败', 'add_money_error'))
+          }
+        })
+      })
+      return res.send(response('mock账单数据成功'))
     }
-    res.send(response('添加账单成功'))
-  })
+
+    const newMoney = await money.save()
+    console.log('newMoney: ', newMoney)
+    await Account.updateAccountValue(
+      data.userId,
+      data.accountId,
+      data.type ? data.value : -data.value
+    )
+    return res.send(response('添加账单成功'))
+  } catch (error) {
+    console.error(error)
+    return res.send(response('添加账单失败', 'add_money_error'))
+  }
 })
 
 // 更新账单
-router.post('/updateMoney', function(req, res, next) {
-  const data = req.body
-  // saved!
-  Money.findOneAndUpdate(
-    { _id: data.moneyId, userId: req.userInfo.id },
-    { ...data, updateTime: new Date() },
-    function(err, docs) {
-      console.log(docs)
-      if (err) {
-        res.send(response('编辑账单失败', 'update_money_error'))
-        console.error(err)
-        return
-      } else if (!docs) {
-        return res.send(response('找不到账单', 'money_not_found'))
-      }
-      // saved!
-      return res.send(response('编辑账单成功'))
+router.post('/updateMoney', async function(req, res, next) {
+  try {
+    const newMoney = req.body
+    const oldMoney = await Money.findOneAndUpdate(
+      { _id: newMoney.moneyId, userId: req.userInfo.id },
+      { ...newMoney, updateTime: new Date() }
+    )
+    if (!oldMoney) {
+      return res.send(response('找不到账单', 'money_not_found'))
     }
-  )
+    await Account.updateAccountValue(
+      req.userInfo.id,
+      oldMoney.accountId,
+      oldMoney.type ? -oldMoney.value : oldMoney.value
+    )
+    await Account.updateAccountValue(
+      req.userInfo.id,
+      newMoney.accountId,
+      newMoney.type ? newMoney.value : -newMoney.value
+    )
+    return res.send(response('编辑账单成功'))
+  } catch (error) {
+    res.send(response('编辑账单失败', 'update_money_error'))
+    console.error(error)
+    return
+  }
 })
 
 // 删除账单
-router.post('/deleteMoney', function(req, res, next) {
-  const moneyId = req.body.moneyId
-  // saved!
-  Money.deleteMany(
-    { _id: { $in: moneyId.split(',') }, userId: req.userInfo.id },
-    function(err, docs) {
-      console.log(docs)
-      if (err) {
-        res.send(response('删除账单失败', 'delete_money_error'))
-        console.error(err)
-        return
-      }
-      // saved!
-      res.send(response('删除账单成功'))
-    }
-  )
+router.post('/deleteMoney', async function(req, res, next) {
+  try {
+    const moneyId = req.body.moneyId
+    // saved!
+    await Money.deleteMany({
+      _id: { $in: moneyId.split(',') },
+      userId: req.userInfo.id,
+    })
+    res.send(response('删除账单成功'))
+    await Account.updateAccountValue(
+      req.userInfo.id,
+      data.accountId,
+      data.type ? -data.value : data.value
+    )
+  } catch (error) {
+    res.send(response('删除账单失败', 'delete_money_error'))
+    console.error(error)
+    return
+  }
 })
 
 // 查询账单列表
@@ -159,8 +174,6 @@ router.post('/searchMoneyList', async function(req, res, next) {
 
     searchValue.accountId !== undefined &&
       (query.accountId = searchValue.accountId)
-
-    const categorys = await User.getMoneyInfoByUser(query.userId)
 
     const count = await Money.countDocuments(query)
     const maxPage = Math.floor(count / pageSize) + 1
@@ -219,7 +232,7 @@ router.post('/getMoneyDetail', async function(req, res, next) {
       _id: req.body.moneyId,
     }
     const doc = await Money.findOne(query)
-    const category = await User.getCategoryById(item.userId, item.categoryId)
+    const category = await User.getCategoryById(doc.userId, doc.categoryId)
     const account = await Account.findOne({
       userId: query.userId,
       _id: doc.accountId,

@@ -13,12 +13,12 @@ const categoryScheme = new Schema({
     type: String,
   },
   sort: {
-    type: Number
+    type: Number,
   },
   status: {
     type: Number,
-    default: 1
-  }
+    default: 1,
+  },
 })
 
 const userSchema = new Schema({
@@ -40,7 +40,7 @@ const userSchema = new Schema({
   // 预算
   budgetValue: {
     type: Number,
-    default: 0
+    default: 0,
   },
 
   // 预算周期
@@ -55,13 +55,27 @@ const userSchema = new Schema({
 })
 
 userSchema.statics = {
+  /**
+   * 获取分类列表
+   * @method updateAccountValue
+   * @param {String} [userId] 用户id
+   * @return {array} 分类列表
+   */
   async getCategoryList(userId) {
     return await this.findById(userId).select('categorys')
   },
+
+  /**
+   * 获取指定的分类详情
+   * @method updateAccountValue
+   * @param {String} [userId] 用户id
+   * @param {String} [id] 分类id
+   * @return {object} 分类详情
+   */
   async getCategoryById(userId, id) {
-    const user = await this.findById(userId);
-    return user.categorys.id(id);
-  }
+    const user = await this.findById(userId)
+    return user.categorys.id(id)
+  },
 }
 
 // 将数据模型暴露出去

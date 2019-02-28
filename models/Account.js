@@ -10,32 +10,40 @@ const accountScheme = new Schema({
   },
   name: {
     type: String,
-    required: true
+    required: true,
   },
   color: {
     type: String,
   },
   value: {
     type: Number,
-    required: true
+    required: true,
   },
   summary: {
-    type: String
+    type: String,
   },
   // 更新时间
   updateTime: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
 })
 
 accountScheme.statics = {
-  async changeAccountValue(userId, accountId, changeValue) {
+  /**
+   * 更新账户余额
+   * @method updateAccountValue
+   * @param {String} [userId] 用户id
+   * @param {String} [accountId] 账户id
+   * @param {String} [updateValue] 改变的值，增加传正数，减少传负数
+   * @return {Object} 更新前的文档
+   */
+  async updateAccountValue(userId, accountId, updateValue) {
     const query = {
       userId,
       _id: accountId,
     }
-    return await this.findOneAndUpdate(query, { $inc: { value: changeValue } })
+    return await this.findOneAndUpdate(query, { $inc: { value: updateValue } })
   },
 }
 
