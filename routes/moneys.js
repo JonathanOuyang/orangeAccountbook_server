@@ -3,7 +3,7 @@ const router = express.Router()
 const Money = require('../models/Money')
 const User = require('../models/User')
 const Account = require('../models/Account')
-const { response, docsToObject } = require('../utils/utils')
+const { response } = require('../utils/utils')
 const Mock = require('mockjs')
 const Moment = require('moment')
 
@@ -175,6 +175,9 @@ router.post('/searchMoneyList', async function(req, res, next) {
     searchValue.accountId !== undefined &&
       (query.accountId = searchValue.accountId)
 
+    searchValue.note !== undefined &&
+      (query.note = new RegExp(`.*${searchValue.note}.*`,'im'))
+
     const count = await Money.countDocuments(query)
     const maxPage = Math.floor(count / pageSize) + 1
     const currPage = maxPage < page ? maxPage : page
@@ -206,7 +209,8 @@ router.post('/searchMoneyList', async function(req, res, next) {
           name: account.name,
         },
         moneyTime: item.moneyTime,
-        updateTime: item.updateTime,
+        note: item.note,
+        updateTime: item.updateTime
       }
       list.push(money)
     }
