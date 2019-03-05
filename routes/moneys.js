@@ -176,7 +176,7 @@ router.post('/searchMoneyList', async function(req, res, next) {
       (query.accountId = searchValue.accountId)
 
     searchValue.note !== undefined &&
-      (query.note = new RegExp(`.*${searchValue.note}.*`,'im'))
+      (query.note = new RegExp(`.*${searchValue.note}.*`, 'im'))
 
     const count = await Money.countDocuments(query)
     const maxPage = Math.floor(count / pageSize) + 1
@@ -188,6 +188,8 @@ router.post('/searchMoneyList', async function(req, res, next) {
       .limit(pageSize)
 
     const list = []
+    let incomeSum = 0,
+      outcomeSum = 0
     for (const item of moneys) {
       const category = await User.getCategoryById(item.userId, item.categoryId)
       const account = await Account.findOne({
@@ -210,7 +212,12 @@ router.post('/searchMoneyList', async function(req, res, next) {
         },
         moneyTime: item.moneyTime,
         note: item.note,
-        updateTime: item.updateTime
+        updateTime: item.updateTime,
+      }
+      if (item.type == 0) {
+        outcomeSum += item.value
+      } else if (item.type == 1) {
+        incomeSum += item.value
       }
       list.push(money)
     }
@@ -218,6 +225,8 @@ router.post('/searchMoneyList', async function(req, res, next) {
     return res.send(
       response('查询账单成功', null, {
         list,
+        incomeSum,
+        outcomeSum,
         currPage,
         maxPage,
         pageSize,
