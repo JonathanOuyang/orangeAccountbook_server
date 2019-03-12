@@ -1,3 +1,6 @@
+const mongoose = require('mongoose')
+const ObjectId = mongoose.Types.ObjectId
+
 /**
  * 返回接口响应数据
  * @method response
@@ -7,13 +10,12 @@
  * @param {String} [others] 其他数据
  * @return {Object} 响应内容
  */
-const response = (summary, code, data = {}, others={}) => ({
-  code: code || "success",
+const response = (summary, code, data = {}, others = {}) => ({
+  code: code || 'success',
   summary,
   data,
-  ...others
-});
-
+  ...others,
+})
 
 /**
  * 返回接口响应数据
@@ -21,12 +23,64 @@ const response = (summary, code, data = {}, others={}) => ({
  * @param {Array} [docs] 查询回调的文档
  * @return {Object} 以document的_id作为key值的Object
  */
-const docsToObject = (docs) => {
-  const obj = {};
+const docsToObject = docs => {
+  const obj = {}
   docs.map(item => {
     obj[item._id] = item
   })
   return obj
 }
 
-module.exports = {response, docsToObject}
+const getQuery = (searchValue, userId) => {
+  const query = { userId: ObjectId(userId) }
+  if (
+    searchValue.moneyTimeStart !== undefined &&
+    searchValue.moneyTimeStart !== undefined
+  ) {
+    query.moneyTime = {
+      $gte: new Date(searchValue.moneyTimeStart),
+      $lt: new Date(searchValue.moneyTimeEnd),
+    }
+  } else if (searchValue.moneyTimeStart !== undefined) {
+    query.moneyTime = {
+      $gte: new Date(searchValue.moneyTimeStart),
+    }
+  } else if (searchValue.moneyTimeEnd !== undefined) {
+    query.moneyTime = {
+      $lt: new Date(searchValue.moneyTimeEnd),
+    }
+  }
+
+  if (
+    searchValue.minValue !== undefined &&
+    searchValue.maxValue !== undefined
+  ) {
+    query.value = {
+      $gte: searchValue.minValue,
+      $lte: searchValue.maxValue,
+    }
+  } else if (searchValue.minValue !== undefined) {
+    query.value = {
+      $gte: searchValue.minValue,
+    }
+  } else if (searchValue.maxValue !== undefined) {
+    query.value = {
+      $lte: searchValue.maxValue,
+    }
+  }
+
+  searchValue.type !== undefined && (query.type = searchValue.type)
+
+  searchValue.categoryId !== undefined &&
+    (query.categoryId = ObjectId(searchValue.categoryId))
+
+  searchValue.accountId !== undefined &&
+    (query.accountId = ObjectId(searchValue.accountId))
+
+  searchValue.note !== undefined &&
+    (query.note = new RegExp(`.*${searchValue.note}.*`, 'im'))
+    console.log('query: ', query);
+  return query
+}
+
+module.exports = { response, docsToObject, getQuery }
