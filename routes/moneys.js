@@ -206,10 +206,14 @@ router.post('/searchMoneyList', async function(req, res, next) {
           name: category.name,
           icon: category.icon,
         },
-        account: {
-          _id: account._id,
-          name: account.name,
-        },
+        account: account
+          ? {
+              _id: account._id,
+              name: account.name,
+            }
+          : {
+              name: '[已删除账户]',
+            },
         moneyTime: item.moneyTime,
         note: item.note,
         updateTime: item.updateTime,

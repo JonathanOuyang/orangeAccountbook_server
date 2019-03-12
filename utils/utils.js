@@ -79,7 +79,6 @@ const getQuery = (searchValue, userId) => {
 
   searchValue.note !== undefined &&
     (query.note = new RegExp(`.*${searchValue.note}.*`, 'im'))
-    console.log('query: ', query);
   return query
 }
 
