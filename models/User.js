@@ -49,9 +49,10 @@ const userSchema = new Schema({
     1: 月
     2: 年
   */
-  // budgetPeriod: {
-  //   type: Number
-  // },
+  budgetPeriod: {
+    type: Number,
+    default: 1
+  },
 })
 
 userSchema.statics = {
