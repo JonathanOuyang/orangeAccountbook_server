@@ -10,7 +10,7 @@ const categoryScheme = new Schema({
     type: String,
   },
   type: {
-    type: String,
+    type: Number,
   },
   sort: {
     type: Number,
