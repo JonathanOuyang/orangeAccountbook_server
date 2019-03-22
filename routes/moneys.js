@@ -56,7 +56,6 @@ router.post('/addMoney', async function(req, res, next) {
     }
 
     const newMoney = await money.save()
-    console.log('newMoney: ', newMoney)
     await Account.updateAccountValue(
       data.userId,
       data.accountId,
@@ -101,19 +100,23 @@ router.post('/updateMoney', async function(req, res, next) {
 // 删除账单
 router.post('/deleteMoney', async function(req, res, next) {
   try {
-    const moneyId = req.body.moneyId
-    // saved!
-    await Money.deleteMany({
-      _id: { $in: moneyId.split(',') },
-      userId: req.userInfo.id,
-    })
-    res.send(response('删除账单成功'))
-    await Account.updateAccountValue(
-      req.userInfo.id,
-      data.accountId,
-      data.type ? -data.value : data.value
-    )
-  } catch (error) {
+        const moneyId = req.body.moneyId;
+        // saved!
+        // await Money.deleteMany({
+        //   _id: { $in: moneyId.split(',') },
+        //   userId: req.userInfo.id,
+        // })
+        const data = await Money.findOneAndRemove({
+          _id: { $in: moneyId.split(',') },
+          userId: req.userInfo.id,
+        })
+        await Account.updateAccountValue(
+          req.userInfo.id,
+          data.accountId,
+          data.type ? -data.value : data.value
+        );
+        res.send(response("删除账单成功"));
+      } catch (error) {
     res.send(response('删除账单失败', 'delete_money_error'))
     console.error(error)
     return

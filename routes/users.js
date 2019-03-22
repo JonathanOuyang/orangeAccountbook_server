@@ -50,13 +50,14 @@ function getDefaultData() {
     ...item,
     type: 0,
     sort: index,
-    status: 0
+    status: 1
   }));
 
   const incomes = incomeCategory.map((item, index) => ({
     ...item,
     type: 1,
-    sort: index
+    sort: index,
+    status: 1
   }));
 
   const accounts = [
