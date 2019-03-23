@@ -66,14 +66,13 @@ router.post('/getAccountList', (req, res) => {
   }
   const accountId = req.body.accountId
   if (accountId) {
-    query._id = accountId
-    Account.findOne(query, function(err, docs) {
+    Account.findById(accountId, function(err, docs) {
       if (err) {
-        console.log(err)
-        return res.send(response('查询账户失败', 'query_money_error'))
+        console.log(err);
+        return res.send(response("查询账户失败", "query_money_error"));
       }
-      return res.send(response('查询账户成功', null, { detail: docs }))
-    })
+      return res.send(response("查询账户成功", null, { detail: docs }));
+    });
   } else {
     Account.find(query, function(err, docs) {
       if (err) {

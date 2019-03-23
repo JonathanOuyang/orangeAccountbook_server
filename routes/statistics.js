@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Money = require("../models/Money");
 const Account = require("../models/Account");
-const User = require("../models/User");
+const Category = require("../models/Category");
 const { response, getQuery, docsToObject } = require("../utils/utils");
 
 router.post("/getMoneySum", async (req, res, next) => {
@@ -54,14 +54,14 @@ router.post("/getMoneySum", async (req, res, next) => {
     }
 
     data.result = await Money.aggregate([
-      // {
-      //   $lookup: {
-      //     from: 'accounts',
-      //     localField: 'accountId',
-      //     foreignField: '_id',
-      //     as: 'accounts'
-      //   },
-      // },
+      {
+        $lookup: {
+          from: "categorys",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "category"
+        }
+      },
       { $match: getQuery(searchValue, userId) },
       { $project: projectParams },
       {
@@ -77,9 +77,8 @@ router.post("/getMoneySum", async (req, res, next) => {
     if (data.categorys) {
       for (let idx = 0; idx < data.result.length; idx++) {
         const item = data.result[idx];
-        const user = await User.findById(userId);
         const categoryId = item._id.categoryId;
-        const category = user.categorys.id(categoryId);
+        const category = await Category.findById(categoryId);
         data.categorys[categoryId] = category;
       }
     }

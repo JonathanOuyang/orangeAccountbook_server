@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const Account = require("../models/Account");
+const Category = require("../models/Category");
 const { response } = require("../utils/utils");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -116,6 +117,20 @@ router.post("/register", (req, res) => {
                   if (err) {
                     console.log(err);
                     return res.send(response("注册账号失败", "register_error"));
+                  }
+                }
+              );
+              Category.create(
+                defaultData.categorys.map(item => ({
+                  ...item,
+                  userId: user._id
+                })),
+                function(err, docs) {
+                  if (err) {
+                    console.log(err);
+                    return res.send(
+                      response("注册账号失败", "register_error")
+                    );
                   }
                 }
               );
