@@ -47,8 +47,8 @@ router.post("/getMoneySum", async (req, res, next) => {
 
     if (groupType === 3) {
       groupParams.month = "$month";
-      projectParams.day = {
-        $dateToString: { format: "%Y-%m-%d", date: "$moneyTime" }
+      projectParams.month = {
+        $dateToString: { format: "%Y-%m", date: "$moneyTime" },
       };
       sortParams.day = sort;
     }
