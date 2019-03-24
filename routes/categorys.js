@@ -16,7 +16,7 @@ router.post("/getCategoryList", async (req, res) => {
       const category = Category.findById(categoryId);
       return res.send(response("查询分类成功", null, { detail: category }));
     } else {
-      let categorys = await Category.find(query);
+      let categorys = await Category.find(query).sort({ sort: 1 });
       return res.send(response("查询分类成功", null, { list: categorys }));
     }
   } catch (err) {
