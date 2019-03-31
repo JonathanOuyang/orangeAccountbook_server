@@ -4,7 +4,8 @@ const Schema = mongodb.mongoose.Schema;
 
 const categoryScheme = new Schema({
   name: {
-    type: String
+    type: String,
+    required: true
   },
   icon: {
     type: String
@@ -18,6 +19,10 @@ const categoryScheme = new Schema({
   status: {
     type: Number,
     default: 1
+  },
+  parentCategoryId: {
+    type: Schema.Types.ObjectId,
+    ref: "category"
   },
   userId: {
     type: Schema.Types.ObjectId,

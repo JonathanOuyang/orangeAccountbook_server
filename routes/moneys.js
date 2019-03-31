@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const Category = require("../models/Category");
 const Money = require("../models/Money");
 const User = require("../models/User");
 const Account = require("../models/Account");
@@ -218,14 +219,18 @@ router.post("/getMoneyDetail", async function(req, res, next) {
       userId: req.userInfo.id,
       _id: req.body.moneyId
     };
-    const detail = await Money.findOne(query)
+    const data = {}
+    data.detail = await Money.findOne(query)
       .populate("accountId")
       .populate("categoryId");
-    return res.send(
-      response("查询账单成功", null, {
-        detail
-      })
-    );
+    if (data.detail.categoryId.parentCategoryId) {
+      data.parentCategory = await Category.findById(
+        data.detail.categoryId.parentCategoryId
+      );
+    }
+      return res.send(
+        response("查询账单成功", null, data)
+      );
   } catch (err) {
     console.error(err);
     return res.send(response("查询账单失败", "query_money_error"));
