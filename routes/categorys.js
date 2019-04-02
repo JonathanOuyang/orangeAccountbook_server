@@ -7,13 +7,14 @@ const { response } = require("../utils/utils");
 router.post("/getCategoryList", async (req, res) => {
   try {
     const query = {
-      userId: req.userInfo.id
+      userId: req.userInfo.id,
+      parentCategoryId: {$exists: false}
     };
     const categoryId = req.body.categoryId !== undefined && req.body.categoryId;
     req.body.status !== undefined && (query.status = req.body.status);
     req.body.type !== undefined && (query.type = req.body.type);
     if (categoryId) {
-      const category = Category.findById(categoryId);
+      const category = await Category.findById(categoryId);
       return res.send(response("查询分类成功", null, { detail: category }));
     } else {
       let categorys = await Category.find(query).sort({ sort: 1 });
