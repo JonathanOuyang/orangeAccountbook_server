@@ -52,6 +52,7 @@ router.post("/getMoneySum", async (req, res, next) => {
       };
       sortParams.day = sort;
     }
+    sortParams.type = 1;
 
     data.result = await Money.aggregate([
       {
