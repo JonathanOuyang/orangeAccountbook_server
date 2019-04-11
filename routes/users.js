@@ -6,7 +6,8 @@ const Category = require("../models/Category");
 const { response } = require("../utils/utils");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 // 获取用户默认数据
 function getDefaultData() {
   const outcomeCategory = [
@@ -176,7 +177,7 @@ router.post("/login", async (req, res) => {
 router.post("/getUserInfo", async (req, res) => {
   try {
     const query = {
-      userId: req.userInfo.id
+      userId: ObjectId(req.userInfo.id)
     };
     const userInfo = await User.findById(query.userId).select(
       "email name budgetValue"
@@ -219,16 +220,34 @@ router.post("/getBudget", async (req, res) => {
 router.post("/updateBudget", async (req, res) => {
   try {
     const query = {
-      userId: req.userInfo.id
+      userId: ObjectId(req.userInfo.id)
     };
-    const userInfo = await User.findByIdAndUpdate(query.userId, {
+    const userInfo = await User.findById(query.userId);
+    const sum = await Category.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: query,
+          budgetValue: { $sum: "$budgetValue" },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    if (sum[0].budgetValue > req.body.value) {
+      return res.send(
+        response("总预算小于分类预算", "update_value_wrong", {
+          budgetValue: sum[0].budgetValue
+        })
+      );
+    }
+    await User.findByIdAndUpdate(query.userId, {
       budgetValue: req.body.value,
       budgetPeriod: req.body.period
     });
-    res.send(
+    return res.send(
       response("更新预算成功")
     );
-  } catch (error) {
+  } catch (err) {
     console.log(err);
     return res.send(response("更新预算失败", "update_error"));
   }

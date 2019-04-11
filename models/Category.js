@@ -23,6 +23,11 @@ const categoryScheme = new Schema({
     type: Schema.Types.ObjectId,
     ref: "user",
     required: true
+  },
+  // 预算
+  budgetValue: {
+    type: Number,
+    default: 0
   }
 });
 
